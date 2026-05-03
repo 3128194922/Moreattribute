@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.uniye.moreattribute.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "moreattribute.refmap.json",
+  "mixins": [
+    "LivingEntityMixin",
+    "PlayerMixin",
+    "EntityRendererAccessor",
+    "LivingEntityRendererMixin"
+  ],
+  "client": [
+    "LivingEntityRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,5 +1,7 @@
 {
   "attribute.moreattribute.eat_speed": "吃东西速度",
   "attribute.moreattribute.drink_speed": "喝东西速度",
-  "attribute.moreattribute.can_always_eat": "满饱食度可进食"
+  "attribute.moreattribute.can_always_eat": "满饱食度可进食",
+  "attribute.moreattribute.size_scale": "体型缩放",
+  "attribute.moreattribute.no_collision": "无碰撞"
 }
