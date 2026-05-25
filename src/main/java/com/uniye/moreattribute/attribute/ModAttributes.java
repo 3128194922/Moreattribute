@@ -15,14 +15,20 @@ import net.minecraftforge.registries.RegistryObject;
 
 @Mod.EventBusSubscriber(modid = MoreattributeMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModAttributes {
+    public static final double DEFAULT_USE_TIME_SCALE = 1.0D;
+    public static final double MIN_USE_TIME_SCALE = 0.1D;
+    public static final double MAX_USE_TIME_SCALE = 10.0D;
+
     public static final DeferredRegister<Attribute> ATTRIBUTES =
             DeferredRegister.create(ForgeRegistries.ATTRIBUTES, MoreattributeMod.MODID);
 
     public static final RegistryObject<Attribute> EAT_SPEED = ATTRIBUTES.register("eat_speed",
-            () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".eat_speed", 0.0D, 0.0D, 10.0D).setSyncable(true));
+            () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".eat_speed",
+                    DEFAULT_USE_TIME_SCALE, MIN_USE_TIME_SCALE, MAX_USE_TIME_SCALE).setSyncable(true));
 
     public static final RegistryObject<Attribute> DRINK_SPEED = ATTRIBUTES.register("drink_speed",
-            () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".drink_speed", 0.0D, 0.0D, 10.0D).setSyncable(true));
+            () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".drink_speed",
+                    DEFAULT_USE_TIME_SCALE, MIN_USE_TIME_SCALE, MAX_USE_TIME_SCALE).setSyncable(true));
 
     public static final RegistryObject<Attribute> CAN_ALWAYS_EAT = ATTRIBUTES.register("can_always_eat",
             () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".can_always_eat", 0.0D, 0.0D, 1.0D).setSyncable(true));

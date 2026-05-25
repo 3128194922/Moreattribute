@@ -42,30 +42,34 @@ https://github.com/JrDemiurg/Demis-Enigmatic-Dice
 
 ### 1. `moreattribute:eat_speed`
 
-控制玩家吃东西的速度。
+控制玩家吃东西所需时间的倍率。
 
-- 默认值：`0`
-- 范围：`0.0` 到 `10.0`
+- 默认值：`1.0`
+- 范围：`0.1` 到 `10.0`
 - 生效对象：玩家
 
-实现方式不是线性减少时长，而是按等级二分缩短：
+该属性现在按“耗时倍率”工作：
 
-- `0`：原版速度
-- `1`：使用时长减半
-- `2`：使用时长变为原来的 `1/4`
-- `3`：使用时长变为原来的 `1/8`
+- `1.0`：原版所需时间
+- `0.5`：使用时长变为原来的 `1/2`
+- `2.0`：使用时长变为原来的 `2` 倍
+- `0.25`：使用时长变为原来的 `1/4`
+
+实现公式：
+
+- `实际使用时长 = 原版使用时长 * eat_speed`
 
 只有 `UseAnim.EAT` 的物品会受影响。
 
 ### 2. `moreattribute:drink_speed`
 
-控制玩家喝东西的速度。
+控制玩家喝东西所需时间的倍率。
 
-- 默认值：`0`
-- 范围：`0.0` 到 `10.0`
+- 默认值：`1.0`
+- 范围：`0.1` 到 `10.0`
 - 生效对象：玩家
 
-缩短规则和 `eat_speed` 相同，也是按 2 的幂次缩短使用时长。
+缩短规则和 `eat_speed` 相同，也是按耗时倍率计算使用时长。
 
 会影响 `UseAnim.DRINK` 的物品，例如常见饮用类物品。
 
@@ -130,18 +134,18 @@ https://github.com/JrDemiurg/Demis-Enigmatic-Dice
 ### 设置吃东西速度
 
 ```mcfunction
-attribute @p moreattribute:eat_speed base set 1
+attribute @p moreattribute:eat_speed base set 0.5
 ```
 
-效果：吃东西时间减半。
+效果：吃东西所需时间减半。
 
 ### 设置喝东西速度
 
 ```mcfunction
-attribute @p moreattribute:drink_speed base set 2
+attribute @p moreattribute:drink_speed base set 0.5
 ```
 
-效果：喝东西时间变为原来的 `1/4`。
+效果：喝东西所需时间减半。
 
 ### 允许满饱食度继续吃
 
@@ -249,6 +253,7 @@ build/libs/
 ## 注意事项
 
 - `eat_speed` 和 `drink_speed` 只会对玩家生效
+- `eat_speed` 和 `drink_speed` 现在使用耗时倍率语义，`1.0` 为原时长
 - `can_always_eat` 只处理可食用物品，不是通用右键白名单
 - `size_scale` 影响的不只是渲染，还会改碰撞箱和玩家视角高度
 - `no_collision` 当前只处理“是否可被推动”，不是完整无碰撞系统
