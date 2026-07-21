@@ -1,14 +1,17 @@
 package com.uniye.moreattribute.mixin;
 
 import com.uniye.moreattribute.attribute.ModAttributes;
+import com.uniye.moreattribute.accessor.ItemCooldownsAccessor;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,8 +25,16 @@ public abstract class PlayerMixin extends LivingEntity {
         super(type, level);
     }
 
+    @Shadow
+    public ItemCooldowns cooldowns;
+
     @Unique
     private float moreattribute$scale = 1F;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void moreattribute$init(CallbackInfo ci) {
+        ((ItemCooldownsAccessor) (Object) this.cooldowns).moreattribute$setOwner((Player) (Object) this);
+    }
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void moreattribute$onTick(CallbackInfo ci) {

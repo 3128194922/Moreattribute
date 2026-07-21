@@ -39,6 +39,9 @@ public class ModAttributes {
     public static final RegistryObject<Attribute> NO_COLLISION = ATTRIBUTES.register("no_collision",
             () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".no_collision", 0.0D, 0.0D, 1.0D).setSyncable(true));
 
+    public static final RegistryObject<Attribute> COOLDOWN_REDUCTION = ATTRIBUTES.register("cooldown_reduction",
+            () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".cooldown_reduction", 0.0D, 0.0D, 1.0D).setSyncable(true));
+
     private ModAttributes() {
     }
 
@@ -51,6 +54,7 @@ public class ModAttributes {
         event.add(EntityType.PLAYER, EAT_SPEED.get());
         event.add(EntityType.PLAYER, DRINK_SPEED.get());
         event.add(EntityType.PLAYER, CAN_ALWAYS_EAT.get());
+        event.add(EntityType.PLAYER, COOLDOWN_REDUCTION.get());
 
         for (EntityType<? extends LivingEntity> type : event.getTypes()) {
             event.add(type, SIZE_SCALE.get());

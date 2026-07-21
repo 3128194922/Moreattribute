@@ -11,7 +11,7 @@
 
 # 参考MOD：
 吃/喝 速度属性和饱食可吃相关Mixin
-https://github.com/Minecraft-LightLand/FruitsDelight?tab=LGPL-2.1-1-ov-file
+https://github.com/Minecraft-LightLand/FruitsDelight
 
 碰撞体积和碰撞箱Mixin
 https://github.com/JrDemiurg/Demis-Enigmatic-Dice
@@ -25,17 +25,18 @@ https://github.com/JrDemiurg/Demis-Enigmatic-Dice
 
 ## 提供的属性
 
-本模组当前注册了 5 个属性：
+本模组当前注册了 6 个属性：
 
 - `moreattribute:eat_speed`
 - `moreattribute:drink_speed`
 - `moreattribute:can_always_eat`
 - `moreattribute:size_scale`
 - `moreattribute:no_collision`
+- `moreattribute:cooldown_reduction`
 
 其中：
 
-- `eat_speed`、`drink_speed`、`can_always_eat` 只加给玩家
+- `eat_speed`、`drink_speed`、`can_always_eat`、`cooldown_reduction` 只加给玩家
 - `size_scale`、`no_collision` 会加给所有 `LivingEntity`
 
 ## 属性说明
@@ -123,9 +124,28 @@ https://github.com/JrDemiurg/Demis-Enigmatic-Dice
 
 注意：
 
-- 这更接近“无实体推挤”
+- 这更接近"无实体推挤"
 - 不是完整的穿墙
 - 不等于关闭方块碰撞
+
+### 6. `moreattribute:cooldown_reduction`
+
+控制玩家物品冷却缩减百分比。
+
+- 默认值：`0`
+- 范围：`0.0` 到 `1.0`
+- 生效对象：玩家
+
+效果：
+
+- `0.0`：无缩减，原版冷却时长
+- `0.5`：冷却时长缩减 50%（减半）
+- `1.0`：冷却时长缩减 100%（无冷却）
+
+实现方式：
+
+- 拦截 `ItemCooldowns.addCooldown()`，按百分比缩减 `duration`
+- 影响所有原版物品冷却，例如末影珍珠、紫颂果、盾牌等 `cooldown` 机制
 
 ## 最常见用法
 
@@ -171,6 +191,20 @@ attribute @e[type=minecraft:zombie,limit=1,sort=nearest] moreattribute:size_scal
 attribute @e[type=minecraft:villager,limit=1,sort=nearest] moreattribute:no_collision base set 1
 ```
 
+### 缩减物品冷却
+
+```mcfunction
+attribute @p moreattribute:cooldown_reduction base set 0.5
+```
+
+效果：所有物品冷却时长减半。
+
+```mcfunction
+attribute @p moreattribute:cooldown_reduction base set 1
+```
+
+效果：所有物品无冷却。
+
 ## 推荐测试流程
 
 进入游戏后，可以按下面顺序快速验证：
@@ -183,6 +217,8 @@ attribute @e[type=minecraft:villager,limit=1,sort=nearest] moreattribute:no_coll
 6. 观察模型大小、碰撞箱和视角高度是否一起变化
 7. 给目标实体设置 `no_collision`
 8. 用实体碰撞测试是否还能被推动
+9. 给玩家设置 `cooldown_reduction`
+10. 使用末影珍珠测试冷却时长是否按比例缩减
 
 ## 适合的接入方式
 
@@ -200,15 +236,17 @@ attribute @e[type=minecraft:villager,limit=1,sort=nearest] moreattribute:no_coll
 - 种族系统修改 `size_scale`
 - 特殊状态让单位临时获得 `no_collision`
 - 某类职业永久启用 `can_always_eat`
+- 饰品或附魔提供 `cooldown_reduction` 减少技能等待
 
 ## 实现概要
 
 项目当前主要由以下部分组成：
 
-- `ModAttributes`：注册 5 个属性，并把属性挂到玩家或全部生物上
-- `FoodSpeedAttributeHandler`：处理进食、饮用速度和“满饱食度也能吃”的逻辑
+- `ModAttributes`：注册 6 个属性，并把属性挂到玩家或全部生物上
+- `FoodSpeedAttributeHandler`：处理进食、饮用速度和"满饱食度也能吃"的逻辑
+- `ItemCooldownsMixin`：拦截原版物品冷却，实现冷却缩减
 - `LivingEntityMixin`：处理生物体型变化与不可推动
-- `PlayerMixin`：额外处理玩家尺寸与视线高度
+- `PlayerMixin`：额外处理玩家尺寸、视线高度和冷却缩减 Player 关联
 - `LivingEntityRendererMixin`：处理客户端模型缩放和阴影半径同步
 
 ## 配置说明
@@ -255,6 +293,7 @@ build/libs/
 - `eat_speed` 和 `drink_speed` 只会对玩家生效
 - `eat_speed` 和 `drink_speed` 现在使用耗时倍率语义，`1.0` 为原时长
 - `can_always_eat` 只处理可食用物品，不是通用右键白名单
+- `cooldown_reduction` 影响所有原版基于 `ItemCooldowns` 的物品冷却，包括其他模组通过原版冷却系统的物品
 - `size_scale` 影响的不只是渲染，还会改碰撞箱和玩家视角高度
 - `no_collision` 当前只处理“是否可被推动”，不是完整无碰撞系统
 - 若其他模组也修改实体尺寸、渲染缩放或 `isPushable()`，需要做兼容测试
