@@ -16,6 +16,8 @@ https://github.com/Minecraft-LightLand/FruitsDelight
 碰撞体积和碰撞箱Mixin
 https://github.com/JrDemiurg/Demis-Enigmatic-Dice
 
+潜行速度
+https://github.com/Glyceryl6/NoSlowDown.git
 ## 环境
 
 - Minecraft: `1.20.1`
@@ -25,7 +27,7 @@ https://github.com/JrDemiurg/Demis-Enigmatic-Dice
 
 ## 提供的属性
 
-本模组当前注册了 6 个属性：
+本模组当前注册了 8 个属性：
 
 - `moreattribute:eat_speed`
 - `moreattribute:drink_speed`
@@ -33,10 +35,12 @@ https://github.com/JrDemiurg/Demis-Enigmatic-Dice
 - `moreattribute:size_scale`
 - `moreattribute:no_collision`
 - `moreattribute:cooldown_reduction`
+- `moreattribute:sneak_speed`
+- `moreattribute:charge_speed`
 
 其中：
 
-- `eat_speed`、`drink_speed`、`can_always_eat`、`cooldown_reduction` 只加给玩家
+- `eat_speed`、`drink_speed`、`can_always_eat`、`cooldown_reduction`、`sneak_speed`、`charge_speed` 只加给玩家
 - `size_scale`、`no_collision` 会加给所有 `LivingEntity`
 
 ## 属性说明
@@ -147,6 +151,44 @@ https://github.com/JrDemiurg/Demis-Enigmatic-Dice
 - 拦截 `ItemCooldowns.addCooldown()`，按百分比缩减 `duration`
 - 影响所有原版物品冷却，例如末影珍珠、紫颂果、盾牌等 `cooldown` 机制
 
+### 7. `moreattribute:sneak_speed`
+
+控制玩家潜行时的移动速度倍率（移植自 NoSlowDown）。
+
+- 默认值：`0.3`（原版潜行速度倍率）
+- 范围：`0.0` 到 `1.0`
+- 生效对象：玩家
+
+效果：
+
+- `0.3`：原版潜行减速（保留 30% 移速）
+- `1.0`：潜行不减速
+- `0.0`：潜行时完全停下
+
+实现说明：
+
+- 属性值 = 潜行时的移速倍率（`1.0` = 与普通移速一致，`0.5` = 普通移速的一半）
+- 属性值直接替换原版减速倍率，不受“迅捷潜行”附魔影响
+
+### 8. `moreattribute:charge_speed`
+
+控制玩家使用物品时的移动速度倍率（移植自 NoSlowDown）。
+
+- 默认值：`0.2`（原版使用物品速度倍率）
+- 范围：`0.0` 到 `1.0`
+- 生效对象：玩家
+
+效果：
+
+- `0.2`：原版使用物品减速（保留 20% 移速）
+- `1.0`：使用物品不减速
+- `0.0`：使用物品时完全停下
+
+实现说明：
+
+- 覆盖所有“使用物品”状态：弓/弩/三叉戟蓄力、吃、喝、盾牌格挡、望远镜等
+- 只在本地玩家客户端生效
+
 ## 最常见用法
 
 这个模组最直接的用法，是通过原版 `/attribute` 指令给玩家或生物设置属性值。
@@ -205,6 +247,15 @@ attribute @p moreattribute:cooldown_reduction base set 1
 
 效果：所有物品无冷却。
 
+### 潜行/使用物品不减速
+
+```mcfunction
+attribute @p moreattribute:sneak_speed base set 1
+attribute @p moreattribute:charge_speed base set 1
+```
+
+效果：潜行和使用物品（蓄力/吃/喝等）时都保持正常移速。
+
 ## 推荐测试流程
 
 进入游戏后，可以按下面顺序快速验证：
@@ -219,6 +270,8 @@ attribute @p moreattribute:cooldown_reduction base set 1
 8. 用实体碰撞测试是否还能被推动
 9. 给玩家设置 `cooldown_reduction`
 10. 使用末影珍珠测试冷却时长是否按比例缩减
+11. 给玩家设置 `sneak_speed` 为 1，潜行测试是否不再减速
+12. 给玩家设置 `charge_speed` 为 1，吃食物/蓄弓测试是否不再减速
 
 ## 适合的接入方式
 
@@ -248,6 +301,7 @@ attribute @p moreattribute:cooldown_reduction base set 1
 - `LivingEntityMixin`：处理生物体型变化与不可推动
 - `PlayerMixin`：额外处理玩家尺寸、视线高度和冷却缩减 Player 关联
 - `LivingEntityRendererMixin`：处理客户端模型缩放和阴影半径同步
+- `LocalPlayerMixin`：客户端替换潜行/使用物品的减速系数（移植自 NoSlowDown）
 
 ## 配置说明
 
@@ -296,6 +350,9 @@ build/libs/
 - `cooldown_reduction` 影响所有原版基于 `ItemCooldowns` 的物品冷却，包括其他模组通过原版冷却系统的物品
 - `size_scale` 影响的不只是渲染，还会改碰撞箱和玩家视角高度
 - `no_collision` 当前只处理“是否可被推动”，不是完整无碰撞系统
+- `sneak_speed` / `charge_speed` 只影响本地玩家的移动输入（客户端行为），属性值本身会从服务端同步
+- `sneak_speed` / `charge_speed` 的数值即移速倍率（`1.0` = 正常移速，`0.5` = 一半移速），默认 `0.3` / `0.2` 时与原版一致
+- `sneak_speed` 不受“迅捷潜行”附魔影响；`charge_speed` 覆盖所有使用物品状态
 - 若其他模组也修改实体尺寸、渲染缩放或 `isPushable()`，需要做兼容测试
 
 ## License

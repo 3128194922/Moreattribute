@@ -19,6 +19,13 @@ public class ModAttributes {
     public static final double MIN_USE_TIME_SCALE = 0.1D;
     public static final double MAX_USE_TIME_SCALE = 10.0D;
 
+    /** 原版潜行速度倍率（1.0 = 不减速，0.3 = 原版潜行减速） */
+    public static final double DEFAULT_SNEAK_SPEED = 0.3D;
+    /** 原版使用物品（蓄力/吃/喝等）速度倍率（0.2 = 原版减速） */
+    public static final double DEFAULT_CHARGE_SPEED = 0.2D;
+    public static final double MIN_MOVE_SPEED = 0.0D;
+    public static final double MAX_MOVE_SPEED = 1.0D;
+
     public static final DeferredRegister<Attribute> ATTRIBUTES =
             DeferredRegister.create(ForgeRegistries.ATTRIBUTES, MoreattributeMod.MODID);
 
@@ -42,6 +49,14 @@ public class ModAttributes {
     public static final RegistryObject<Attribute> COOLDOWN_REDUCTION = ATTRIBUTES.register("cooldown_reduction",
             () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".cooldown_reduction", 0.0D, 0.0D, 1.0D).setSyncable(true));
 
+    public static final RegistryObject<Attribute> SNEAK_SPEED = ATTRIBUTES.register("sneak_speed",
+            () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".sneak_speed",
+                    DEFAULT_SNEAK_SPEED, MIN_MOVE_SPEED, MAX_MOVE_SPEED).setSyncable(true));
+
+    public static final RegistryObject<Attribute> CHARGE_SPEED = ATTRIBUTES.register("charge_speed",
+            () -> new RangedAttribute("attribute." + MoreattributeMod.MODID + ".charge_speed",
+                    DEFAULT_CHARGE_SPEED, MIN_MOVE_SPEED, MAX_MOVE_SPEED).setSyncable(true));
+
     private ModAttributes() {
     }
 
@@ -55,6 +70,8 @@ public class ModAttributes {
         event.add(EntityType.PLAYER, DRINK_SPEED.get());
         event.add(EntityType.PLAYER, CAN_ALWAYS_EAT.get());
         event.add(EntityType.PLAYER, COOLDOWN_REDUCTION.get());
+        event.add(EntityType.PLAYER, SNEAK_SPEED.get());
+        event.add(EntityType.PLAYER, CHARGE_SPEED.get());
 
         for (EntityType<? extends LivingEntity> type : event.getTypes()) {
             event.add(type, SIZE_SCALE.get());
