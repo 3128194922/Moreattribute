@@ -1,6 +1,6 @@
 # Moreattribute
 
-`Moreattribute` 是一个基于 Minecraft Forge 1.20.1 的属性扩展模组。
+`Moreattribute` 是一个基于 Minecraft Forge 1.20.1 的属性扩展模组。本mod由AI编写。
 
 它主要做两件事：
 
