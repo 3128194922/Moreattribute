@@ -27,7 +27,7 @@ https://github.com/Glyceryl6/NoSlowDown.git
 
 ## 提供的属性
 
-本模组当前注册了 8 个属性：
+本模组当前注册了 10 个属性：
 
 - `moreattribute:eat_speed`
 - `moreattribute:drink_speed`
@@ -37,11 +37,15 @@ https://github.com/Glyceryl6/NoSlowDown.git
 - `moreattribute:cooldown_reduction`
 - `moreattribute:sneak_speed`
 - `moreattribute:charge_speed`
+- `moreattribute:fire_immunity`
+- `moreattribute:max_experience_level`
 
 其中：
 
 - `eat_speed`、`drink_speed`、`can_always_eat`、`cooldown_reduction`、`sneak_speed`、`charge_speed` 只加给玩家
+- `max_experience_level` 只加给玩家
 - `size_scale`、`no_collision` 会加给所有 `LivingEntity`
+- `fire_immunity` 会加给所有 `LivingEntity`
 
 ## 属性说明
 
@@ -189,6 +193,55 @@ https://github.com/Glyceryl6/NoSlowDown.git
 - 覆盖所有“使用物品”状态：弓/弩/三叉戟蓄力、吃、喝、盾牌格挡、望远镜等
 - 只在本地玩家客户端生效
 
+### 9. `moreattribute:fire_immunity`
+
+控制实体受到火焰伤害时的免疫比例。
+
+- 默认值：可着火实体为 `0.0`，原生 `fireImmune() == true` 的实体为 `1.0`
+- 范围：`0.0` 到 `1.0`
+- 生效对象：所有 `LivingEntity`
+
+效果：
+
+- `0.0`：不额外减少火焰伤害
+- `0.5`：火焰伤害降低 50%
+- `1.0`：完全免疫火焰，且 `fireImmune()` 返回 `true`
+
+计算公式：
+
+```text
+实际火焰伤害 = 原始火焰伤害 × (1 - fire_immunity)
+```
+
+所有 `LivingEntity` 都会注册该属性：默认能够着火的实体初始值为 `0.0`，原生已经完全免疫火焰的实体初始值为 `1.0`。原生火焰免疫实体默认保持原版行为；当属性被改为低于 `1.0` 时，原生免疫会被属性覆盖，实体可以重新受到火焰伤害。只有属性达到 `1.0` 时，`fireImmune()` 才返回 `true`；部分免疫不会改变这个布尔结果，避免其他模组将部分免疫误判为完全免疫。本属性只衰减带有原版 `minecraft:is_fire` 标签的伤害，不修改着火状态持续时间。
+
+默认情况下，`fire_immunity` 还会覆盖原版抗火药水：属性为 `0.0` 时抗火药水失效，属性为 `0.5` 时仍受到 50% 火焰伤害。可以在配置中关闭此覆盖，让抗火药水恢复原版的完全免疫效果。
+
+其他模组或数据包自定义的火焰伤害类型，需要加入 `minecraft:is_fire` damage type 标签后才会自动适用本属性。带有 `bypasses_invulnerability` 标签的伤害保留绕过无敌判定的原行为。
+
+Boss 兼容（可选模组存在时自动启用）：
+
+部分 mod 的 boss 并不依赖 `fireImmune()`，而是在自己的 `hurt()` 里硬编码拦截 `minecraft:is_fire` 火焰伤害，导致本属性对其无效。本模组通过条件 Mixin 兼容以下 boss（对应 mod 未安装时 Mixin 自动禁用，无任何影响）：
+
+- 安卡顽敌 `anka_mobs`：远古幽魂 `anka_mobs:ancient_wraith`、驱魔骷髅 `anka_mobs:demagic_skull`、炼狱花 `anka_mobs:purgatorite_flower`
+- Yazz's Dungeons: The Sequel `ydtwo`：监守者 `ydtwo:twisted_warden`
+
+这些 boss 的 `fire_immunity` 默认值按"原生火焰免疫"处理为 `1.0`（属性未降低时行为与原 mod 完全一致）；当属性被降低到 `1.0` 以下时，其 `hurt()` 内的火焰伤害拦截会被跳过，火焰伤害继续走 boss 自身的出生免伤/伤害上限等规则与原版伤害管线，并按上方公式缩放。
+
+### 10. `moreattribute:max_experience_level`
+
+控制玩家可达到的最高经验等级。
+
+- 默认值：`0`
+- 范围：`0` 到 `2147483647`（整型最大值）
+- 生效对象：玩家
+
+属性值为 `0` 时不限制经验等级，保持原版经验行为。属性值大于 `0` 时向下取整作为等级上限；例如 `100` 表示玩家不能升到 101 级，`0.5` 会限制在 0 级。经验点或直接等级增加都不能越过启用的上限，跨越上限的经验溢出会被舍弃。
+
+玩家达到上限后不会拾取经验球，经验球会留在世界中。使玩家刚好达到上限的经验球仍可正常吸收。
+
+原版 `/experience`（别名 `/xp`）的 `add` 和 `set` 子命令也遵循该规则：启用上限时，`add` 不会使等级越界，`set levels` 会被限制到上限，玩家已达上限时 `set points` 会清空经验条进度。属性值为 `0` 时，这些命令和经验球判定都保持原版无限制行为。
+
 ## 最常见用法
 
 这个模组最直接的用法，是通过原版 `/attribute` 指令给玩家或生物设置属性值。
@@ -256,6 +309,49 @@ attribute @p moreattribute:charge_speed base set 1
 
 效果：潜行和使用物品（蓄力/吃/喝等）时都保持正常移速。
 
+### 设置火焰免疫
+
+```mcfunction
+attribute @e[type=minecraft:zombie,limit=1,sort=nearest] moreattribute:fire_immunity base set 0.5
+```
+
+效果：目标受到的火焰伤害降低 50%。
+
+设置完全免疫：
+
+```mcfunction
+attribute @e[type=minecraft:zombie,limit=1,sort=nearest] moreattribute:fire_immunity base set 1
+```
+
+效果：目标完全免疫火焰，并且其他模组调用目标的 `fireImmune()` 时会得到 `true`。对于原本自带火焰免疫的实体，将属性设置为 `0` 后即可取消其火焰免疫。
+
+### 设置玩家经验等级上限
+
+```mcfunction
+attribute @p moreattribute:max_experience_level base set 100
+```
+
+效果：玩家最高升至 100 级；达到 100 级后，经验球不会被拾取。
+
+恢复原版无限制经验：
+
+```mcfunction
+attribute @p moreattribute:max_experience_level base set 0
+```
+
+命令行为检查（将示例上限设为 `5`）：
+
+```mcfunction
+attribute @p moreattribute:max_experience_level base set 5
+experience add @p 100 levels
+experience set @p 100 levels
+experience set @p 50 points
+attribute @p moreattribute:max_experience_level base set 0
+experience set @p 100 levels
+```
+
+启用上限时，前两条经验命令都不会让等级超过 5；玩家已到 5 级时，设置经验点会将进度归零。将属性改为 `0` 后，最后一条命令可按原版行为设置等级，不受上限限制。
+
 ## 推荐测试流程
 
 进入游戏后，可以按下面顺序快速验证：
@@ -272,6 +368,16 @@ attribute @p moreattribute:charge_speed base set 1
 10. 使用末影珍珠测试冷却时长是否按比例缩减
 11. 给玩家设置 `sneak_speed` 为 1，潜行测试是否不再减速
 12. 给玩家设置 `charge_speed` 为 1，吃食物/蓄弓测试是否不再减速
+13. 给玩家或怪物设置 `fire_immunity` 为 0.5，观察火焰伤害是否降低一半
+14. 将 `fire_immunity` 设置为 1，确认实体完全免疫火焰
+15. 确认 `fire_immunity` 为 0.5 时，其他模组的 `fireImmune()` 判定仍不会被误判为完全免疫
+16. 将 `max_experience_level` 设为 `2`，确认玩家能升到 2 级但不能超过上限
+17. 达到上限后触碰经验球，确认经验球仍留在世界中
+18. 将 `max_experience_level` 设为 `0`，确认经验获取恢复原版行为
+19. 使用 `/experience add`（或 `/xp add`）增加等级，确认不会越过启用的上限
+20. 使用 `/experience set <玩家> <等级> levels`，确认设置值会受启用的上限约束
+21. 玩家达到上限后使用 `/experience set <玩家> <经验点> points`，确认经验条进度归零
+22. 将属性设为 `0` 后重复 `/xp set`，确认命令恢复原版无限制行为
 
 ## 适合的接入方式
 
@@ -290,20 +396,33 @@ attribute @p moreattribute:charge_speed base set 1
 - 特殊状态让单位临时获得 `no_collision`
 - 某类职业永久启用 `can_always_eat`
 - 饰品或附魔提供 `cooldown_reduction` 减少技能等待
+- Boss 或装备词条系统提供 `fire_immunity`
 
 ## 实现概要
 
 项目当前主要由以下部分组成：
 
-- `ModAttributes`：注册 6 个属性，并把属性挂到玩家或全部生物上
+- `ModAttributes`：注册 10 个属性，并把属性挂到玩家或全部生物上
 - `FoodSpeedAttributeHandler`：处理进食、饮用速度和"满饱食度也能吃"的逻辑
 - `ItemCooldownsMixin`：拦截原版物品冷却，实现冷却缩减
 - `LivingEntityMixin`：处理生物体型变化与不可推动
 - `PlayerMixin`：额外处理玩家尺寸、视线高度和冷却缩减 Player 关联
 - `LivingEntityRendererMixin`：处理客户端模型缩放和阴影半径同步
 - `LocalPlayerMixin`：客户端替换潜行/使用物品的减速系数（移植自 NoSlowDown）
+- `EntityFireImmunityMixin` 与 `FireImmunityAttributeHandler`：保留原始 `fireImmune()` 语义，并按属性衰减火焰伤害
+- `LivingEntityFireResistanceMixin`：按配置决定 `fire_immunity` 是否覆盖抗火药水
+- `FireImmunityMath`：统一处理免疫比例范围、完全免疫判定和伤害计算
+- `ExperienceLevelAttributeHandler`：按玩家的 `max_experience_level` 属性限制经验增长和经验球拾取
 
 ## 配置说明
+
+### `fireImmunityOverridesFireResistance`
+
+控制 `fire_immunity` 是否覆盖原版抗火药水。
+
+- 默认值：`true`
+- `true`：属性优先，属性不为 `1.0` 时抗火药水不会阻止火焰伤害
+- `false`：抗火药水优先，具有抗火效果时仍完全免疫火焰
 
 项目内存在一个 Forge `COMMON` 配置类，但当前这些配置项基本还是模板内容：
 
@@ -353,6 +472,14 @@ build/libs/
 - `sneak_speed` / `charge_speed` 只影响本地玩家的移动输入（客户端行为），属性值本身会从服务端同步
 - `sneak_speed` / `charge_speed` 的数值即移速倍率（`1.0` = 正常移速，`0.5` = 一半移速），默认 `0.3` / `0.2` 时与原版一致
 - `sneak_speed` 不受“迅捷潜行”附魔影响；`charge_speed` 覆盖所有使用物品状态
+- `fire_immunity` 的 `0.5` 只代表火焰伤害降低 50%，不会让 `fireImmune()` 返回 `true`
+- `fire_immunity` 会注册给所有生物实体；默认可着火实体为 `0.0`，原生火焰免疫实体为 `1.0`
+- 原生火焰免疫实体的免疫状态由 `fire_immunity` 接管；将其设置为低于 `1.0` 后会允许受到火焰伤害
+- `fireImmunityOverridesFireResistance` 默认为 `true`；设为 `false` 时，抗火药水优先并保持原版完全免疫
+- `fire_immunity` 只识别带 `minecraft:is_fire` 标签的伤害类型，不会按其他模组 ID 硬编码判断
+- `fire_immunity` 不改变实体着火时间；若需要同时缩短着火时间，需要额外的状态或事件逻辑
+- `max_experience_level` 范围为 `0` 至 `2147483647`；默认值 `0` 表示不限制经验等级，正数才启用上限
+- `max_experience_level` 达到上限后会阻止经验球拾取，经验球保留在世界中
 - 若其他模组也修改实体尺寸、渲染缩放或 `isPushable()`，需要做兼容测试
 
 ## License

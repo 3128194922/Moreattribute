@@ -2,14 +2,20 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.uniye.moreattribute.mixin",
+  "plugin": "com.uniye.moreattribute.mixin.compat.CompatMixinPlugin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "moreattribute.refmap.json",
   "mixins": [
     "LivingEntityMixin",
     "PlayerMixin",
+    "ServerPlayerExperienceMixin",
+    "EntityFireImmunityMixin",
+    "LivingEntityFireResistanceMixin",
     "ItemCooldownsMixin",
     "EntityRendererAccessor",
-    "LivingEntityRendererMixin"
+    "LivingEntityRendererMixin",
+    "compat.AnkaBossFireCompatMixin",
+    "compat.YazzWardenFireCompatMixin"
   ],
   "client": [
     "LivingEntityRendererMixin",

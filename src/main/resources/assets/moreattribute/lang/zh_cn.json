@@ -6,5 +6,7 @@
   "attribute.moreattribute.no_collision": "无碰撞",
   "attribute.moreattribute.cooldown_reduction": "冷却缩减",
   "attribute.moreattribute.sneak_speed": "潜行速度",
-  "attribute.moreattribute.charge_speed": "蓄力移速"
+  "attribute.moreattribute.charge_speed": "蓄力移速",
+  "attribute.moreattribute.fire_immunity": "火焰免疫",
+  "attribute.moreattribute.max_experience_level": "最大经验等级"
 }
