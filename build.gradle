@@ -149,11 +149,6 @@ dependencies {
     // The group id is ignored when searching -- in this case, it is "blank"
     // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
 
-    // 兼容目标 mod（仅编译期，供 Mixin 注解处理器解析目标类；不打包、无运行时依赖）。
-    // 保持其 SRG 字节码原样参与编译，配合 Mixin 注解 remap=false 直接按 SRG 名匹配。
-    compileOnly files('libs/compat/anka_mobs-2.1.jar')
-    compileOnly files('libs/compat/ydtwo-1.0.1.jar')
-
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html

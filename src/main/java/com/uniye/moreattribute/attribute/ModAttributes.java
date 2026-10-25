@@ -1,7 +1,6 @@
 package com.uniye.moreattribute.attribute;
 
 import com.uniye.moreattribute.MoreattributeMod;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -9,14 +8,10 @@ import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = MoreattributeMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModAttributes {
@@ -90,39 +85,7 @@ public class ModAttributes {
         for (EntityType<? extends LivingEntity> type : event.getTypes()) {
             event.add(type, SIZE_SCALE.get());
             event.add(type, NO_COLLISION.get());
-            event.add(type, FIRE_IMMUNITY.get(), isNativelyFireImmune(type) ? 1.0D : 0.0D);
-        }
-    }
-
-    private static boolean isNativelyFireImmune(EntityType<?> type) {
-        return type.fireImmune() || getCompatFireImmuneBossTypes().contains(type);
-    }
-
-    /**
-     * 这些 boss 的火焰免疫来自其 hurt() 硬编码拦截而非实体类型的 fire_immune 标记，
-     * 属性默认值按"原生火焰免疫"（1.0）处理，被降低后兼容 Mixin 才会放行火焰伤害。
-     */
-    private static Set<EntityType<?>> getCompatFireImmuneBossTypes() {
-        Set<EntityType<?>> types = new HashSet<>();
-        ModList modList = ModList.get();
-        if (modList == null) {
-            return types;
-        }
-        if (modList.isLoaded("anka_mobs")) {
-            addEntityTypeIfPresent(types, "anka_mobs:ancient_wraith");
-            addEntityTypeIfPresent(types, "anka_mobs:demagic_skull");
-            addEntityTypeIfPresent(types, "anka_mobs:purgatorite_flower");
-        }
-        if (modList.isLoaded("ydtwo")) {
-            addEntityTypeIfPresent(types, "ydtwo:twisted_warden");
-        }
-        return types;
-    }
-
-    private static void addEntityTypeIfPresent(Set<EntityType<?>> types, String id) {
-        ResourceLocation key = new ResourceLocation(id);
-        if (ForgeRegistries.ENTITY_TYPES.containsKey(key)) {
-            types.add(ForgeRegistries.ENTITY_TYPES.getValue(key));
+            event.add(type, FIRE_IMMUNITY.get(), type.fireImmune() ? 1.0D : 0.0D);
         }
     }
 }

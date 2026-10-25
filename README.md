@@ -219,15 +219,6 @@ https://github.com/Glyceryl6/NoSlowDown.git
 
 其他模组或数据包自定义的火焰伤害类型，需要加入 `minecraft:is_fire` damage type 标签后才会自动适用本属性。带有 `bypasses_invulnerability` 标签的伤害保留绕过无敌判定的原行为。
 
-Boss 兼容（可选模组存在时自动启用）：
-
-部分 mod 的 boss 并不依赖 `fireImmune()`，而是在自己的 `hurt()` 里硬编码拦截 `minecraft:is_fire` 火焰伤害，导致本属性对其无效。本模组通过条件 Mixin 兼容以下 boss（对应 mod 未安装时 Mixin 自动禁用，无任何影响）：
-
-- 安卡顽敌 `anka_mobs`：远古幽魂 `anka_mobs:ancient_wraith`、驱魔骷髅 `anka_mobs:demagic_skull`、炼狱花 `anka_mobs:purgatorite_flower`
-- Yazz's Dungeons: The Sequel `ydtwo`：监守者 `ydtwo:twisted_warden`
-
-这些 boss 的 `fire_immunity` 默认值按"原生火焰免疫"处理为 `1.0`（属性未降低时行为与原 mod 完全一致）；当属性被降低到 `1.0` 以下时，其 `hurt()` 内的火焰伤害拦截会被跳过，火焰伤害继续走 boss 自身的出生免伤/伤害上限等规则与原版伤害管线，并按上方公式缩放。
-
 ### 10. `moreattribute:max_experience_level`
 
 控制玩家可达到的最高经验等级。
